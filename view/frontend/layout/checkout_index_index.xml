@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+  ~ Illia Neiman
+  ~
+  ~ NOTICE OF LICENSE
+  ~
+  ~ According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+  ~ Specially for eCommerce usage.
+  ~
+  ~ @category Ineiman
+  ~ @package TikTok
+  ~ @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+  ~ @email kg.illya.ney@gmail.com
+  -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceContainer name="content">
+        <block ifconfig="tiktok/general/enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.checkout.main" template="Ineiman_TikTok::main.phtml">
+            <block ifconfig="tiktok/frontend_events/enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.checkout.main.frontend" template="Ineiman_TikTok::main.phtml">
+                <block ifconfig="tiktok/frontend_events/initiate_checkout_enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.initiate.checkout" template="Ineiman_TikTok::track/tiktok/events-direct-tracking.phtml">
+                    <arguments>
+                        <argument name="payload" xsi:type="helper" helper="Ineiman\TikTok\Api\TiktokManagementInterface::getInitiateCheckoutEventPayload" />
+                    </arguments>
+                </block>
+                <block ifconfig="tiktok/frontend_events/add_payment_info_enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.customer.complete.registration" template="Ineiman_TikTok::track/tiktok/events-section-tracking.phtml">
+                    <arguments>
+                        <argument name="event_name" xsi:type="const">Ineiman\TikTok\Api\Data\TikTokInterface::EVENT_NAME_ADD_PAYMENT_INFO</argument>
+                        <argument name="event_section_name" xsi:type="const">Ineiman\TikTok\Api\Data\TikTokInterface::EVENT_KEY_ADD_PAYMENT_INFO</argument>
+                    </arguments>
+                </block>
+            </block>
+        </block>
+    </referenceContainer>
+</page>

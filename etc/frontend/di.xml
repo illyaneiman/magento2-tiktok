@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+  ~ Illia Neiman
+  ~
+  ~ NOTICE OF LICENSE
+  ~
+  ~ According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+  ~ Specially for eCommerce usage.
+  ~
+  ~ @category Ineiman
+  ~ @package TikTok
+  ~ @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+  ~ @email kg.illya.ney@gmail.com
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Customer\CustomerData\SectionPoolInterface">
+        <arguments>
+            <argument name="sectionSourceMap" xsi:type="array">
+                <item name="ineiman_tiktok_add_to_cart" xsi:type="string">Ineiman\TikTok\CustomerData\AddToCart</item>
+                <item name="ineiman_tiktok_remove_from_cart" xsi:type="string">Ineiman\TikTok\CustomerData\RemoveFromCart</item>
+                <item name="ineiman_tiktok_update_cart" xsi:type="string">Ineiman\TikTok\CustomerData\UpdateCart</item>
+                <item name="ineiman_tiktok_add_to_wishlist" xsi:type="string">Ineiman\TikTok\CustomerData\AddToWishlist</item>
+                <item name="ineiman_tiktok_add_payment_info" xsi:type="string">Ineiman\TikTok\CustomerData\AddPaymentInfo</item>
+                <item name="ineiman_tiktok_complete_registration" xsi:type="string">Ineiman\TikTok\CustomerData\CompleteRegistration</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+  ~ Illia Neiman
+  ~
+  ~ NOTICE OF LICENSE
+  ~
+  ~ According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+  ~ Specially for eCommerce usage.
+  ~
+  ~ @category Ineiman
+  ~ @package TikTok
+  ~ @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+  ~ @email kg.illya.ney@gmail.com
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="checkout_cart_product_add_after">
+        <observer name="ineiman_tiktok_add_to_cart" instance="Ineiman\TikTok\Observer\Magento\Checkout\Cart\ProductAddAfter" />
+    </event>
+    <event name="checkout_cart_update_items_after">
+        <observer name="ineiman_tiktok_update_cart" instance="Ineiman\TikTok\Observer\Magento\Checkout\Cart\UpdateItemsAfter" />
+    </event>
+    <event name="sales_quote_remove_item">
+        <observer name="ineiman_tiktok_remove_from_cart" instance="Ineiman\TikTok\Observer\Magento\Sales\Quote\RemoveItem" />
+    </event>
+    <event name="sales_order_place_after">
+        <observer name="ineiman_tiktok_place_an_order" instance="Ineiman\TikTok\Observer\Magento\Sales\Order\PlaceAnOrder"/>
+    </event>
+    <event name="sales_order_invoice_pay">
+        <observer name="ineiman_tiktok_purchase" instance="Ineiman\TikTok\Observer\Magento\Sales\Order\Invoice\Pay"/>
+    </event>
+    <event name="wishlist_add_product">
+        <observer name="ineiman_tiktok_add_to_wishlist" instance="Ineiman\TikTok\Observer\Magento\Wishlist\Add" />
+    </event>
+    <event name="wishlist_item_delete_after">
+        <observer name="ineiman_tiktok_remove_from_wishlist" instance="Ineiman\TikTok\Observer\Magento\Wishlist\Remove" />
+    </event>
+    <event name="controller_action_postdispatch_catalog_product_view">
+        <observer name="ineiman_tiktok_view_content" instance="Ineiman\TikTok\Observer\Magento\Catalog\Controller\Product\View" />
+    </event>
+    <event name="controller_action_postdispatch_checkout_index_index">
+        <observer name="ineiman_tiktok_initiate_checkout" instance="Ineiman\TikTok\Observer\Magento\Checkout\Controller\Index\Index" />
+    </event>
+    <event name="customer_register_success">
+        <observer name="ineiman_tiktok_complete_registration" instance="Ineiman\TikTok\Observer\Magento\Customer\Registration\Success" />
+    </event>
+</config>

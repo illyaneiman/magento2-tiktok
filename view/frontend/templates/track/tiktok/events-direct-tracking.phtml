@@ -1,0 +1,30 @@
+<?php
+/**
+ * Illia Neiman
+ *
+ * NOTICE OF LICENSE
+ *
+ * According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+ * Specially for eCommerce usage.
+ *
+ * @category Ineiman
+ * @package TikTok
+ * @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+ * @email kg.illya.ney@gmail.com
+ */
+
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+
+$payload = $block->getData('payload');
+$eventName = $payload['event'];
+$properties = json_encode($payload['properties']);
+$eventId = $payload['event_id'];
+?>
+<?php $script = <<<script
+    ttq.track('{$eventName}', {$properties}, {event_id: '{$eventId}'});
+script;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false); ?>

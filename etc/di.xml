@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+  ~ Illia Neiman
+  ~
+  ~ NOTICE OF LICENSE
+  ~
+  ~ According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+  ~ Specially for eCommerce usage.
+  ~
+  ~ @category Ineiman
+  ~ @package TikTok
+  ~ @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+  ~ @email kg.illya.ney@gmail.com
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Ineiman\TikTok\Api\TiktokManagementInterface" type="Ineiman\TikTok\Model\TiktokManagement" />
+    <virtualType name="Ineiman\TikTok\Logger\Handler\Debugger" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/tiktok/debug.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Ineiman\TikTok\Logger\DebugLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">IneimanTiktokLogger</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Ineiman\TikTok\Logger\Handler\Debugger</item>
+                <item name="debug" xsi:type="object">Monolog\Handler\NullHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Ineiman\TikTok\Logger\Logger">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ineiman\TikTok\Logger\DebugLogger</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Quote\Api\PaymentMethodManagementInterface">
+        <plugin name="ineiman_tiktok_add_payment_info" type="Ineiman\TikTok\Plugin\Magento\Quote\Model\PaymentMethodManagement" sortOrder="100"/>
+    </type>
+    <type name="Magento\Quote\Api\GuestPaymentMethodManagementInterface">
+        <plugin name="ineiman_tiktok_guest_add_payment_info" type="Ineiman\TikTok\Plugin\Magento\Quote\Model\PaymentMethodManagement" sortOrder="100"/>
+    </type>
+    <type name="Magento\CatalogSearch\Controller\Result\Index">
+        <plugin name="ineiman_tiktok_search" type="Ineiman\TikTok\Plugin\Magento\CatalogSearch\Controller\Result\Index" sortOrder="100"/>
+    </type>
+</config>

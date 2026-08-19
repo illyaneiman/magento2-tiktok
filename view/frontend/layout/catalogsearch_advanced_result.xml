@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+  ~ Illia Neiman
+  ~
+  ~ NOTICE OF LICENSE
+  ~
+  ~ According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+  ~ Specially for eCommerce usage.
+  ~
+  ~ @category Ineiman
+  ~ @package TikTok
+  ~ @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+  ~ @email kg.illya.ney@gmail.com
+  -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceContainer name="content">
+        <block ifconfig="tiktok/general/enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.search.main" template="Ineiman_TikTok::main.phtml">
+            <block ifconfig="tiktok/frontend_events/enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.search.main.frontend" template="Ineiman_TikTok::main.phtml">
+                <block ifconfig="tiktok/frontend_events/search_enabled" class="Magento\Framework\View\Element\Template" name="tiktok.track.search" template="Ineiman_TikTok::track/tiktok/events-direct-tracking.phtml">
+                    <arguments>
+                        <argument name="payload" xsi:type="helper" helper="Ineiman\TikTok\Api\TiktokManagementInterface::getSearchEventPayload" />
+                    </arguments>
+                </block>
+            </block>
+        </block>
+    </referenceContainer>
+</page>

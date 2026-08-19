@@ -1,0 +1,33 @@
+<?php
+/**
+ * Illia Neiman
+ *
+ * NOTICE OF LICENSE
+ *
+ * According to LICENCE file you are not allowed to copy, use or recreate this file in any ways.
+ * Specially for eCommerce usage.
+ *
+ * @category Ineiman
+ * @package TikTok
+ * @copyright Copyright (c) 2021-current Ineiman (https://github.com/illyaneiman)
+ * @email kg.illya.ney@gmail.com
+ */
+
+/**
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+
+$eventName = $block->getData('event_name');
+$eventSectionName = $block->getData('event_section_name');
+?>
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "tiktokTrackEventsSection": {
+                "eventName": "<?= $escaper->escapeHtml($eventName); ?>",
+                "eventSectionName": "<?= $escaper->escapeHtml($eventSectionName); ?>"
+            }
+        }
+    }
+</script>

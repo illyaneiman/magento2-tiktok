@@ -1,0 +1,32 @@
+{
+    "name": "ineiman/magento2-tiktok",
+    "description": "Magento2 Tiktok Module",
+    "type": "magento2-module",
+    "version": "2.4.7.0",
+    "authors": [
+        {
+            "name": "Illia Neiman",
+            "homepage": "https://github.com/illyaneiman"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://github.com/illyaneiman/magento2-tiktok.git"
+        }
+    ],
+    "require": {
+        "ineiman/base": "*"
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Ineiman\\Tiktok\\": ""
+        }
+    }
+}
