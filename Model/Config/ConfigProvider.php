@@ -54,7 +54,7 @@ class ConfigProvider
     public const XML_PATH_BE_INITIATE_CHECKOUT_ENABLED = 'tiktok/backend_events/initiate_checkout_enabled';
     public const XML_PATH_BE_ADD_PAYMENT_INFO_ENABLED = 'tiktok/backend_events/add_payment_info_enabled';
     public const XML_PATH_BE_PLACE_AN_ORDER_ENABLED = 'tiktok/backend_events/place_an_order_enabled';
-    public const XML_PATH_BE_PURCHASE_ENABLED = 'tiktok/backend_events/place_an_order_enabled';
+    public const XML_PATH_BE_PURCHASE_ENABLED = 'tiktok/backend_events/purchase_enabled';
     public const XML_PATH_BE_SEARCH_ENABLED = 'tiktok/backend_events/search_enabled';
     public const XML_PATH_BE_COMPLETE_REGISTRATION_ENABLED = 'tiktok/backend_events/complete_registration_enabled';
     /**#@- */

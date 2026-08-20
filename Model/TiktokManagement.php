@@ -280,13 +280,27 @@ class TiktokManagement implements TiktokManagementInterface
      */
     public function getPurchaseEventPayload(Invoice $invoice): array
     {
-        $properties = [
-            'increment_id' => $invoice->getIncrementId(),
-            'value' => $invoice->getGrandTotal(),
-            'order_id' => $invoice->getOrder()?->getIncrementId()
+        $items = $invoice->getAllItems();
+        $order = $invoice->getOrder();
+        $productsContent = $this->prepareProductsContent($items);
+        $properties = $this->preparePropertiesData(
+            $productsContent,
+            TikTokInterface::CONTENT_TYPE_PRODUCT_GROUP,
+            'Invoice for an order #' . $order->getIncrementId(),
+            (float)$invoice->getGrandTotal()
+        );
+
+        $payload = $this->getEventPayload(TikTokInterface::EVENT_NAME_PURCHASE, $properties);
+        $payload['user'] = [
+            'email' => $this->hashCustomerData($order->getCustomerEmail()),
+            'phone' => $this->hashCustomerData($invoice->getShippingAddress()->getTelephone())
         ];
 
-        return $this->getEventPayload(TikTokInterface::EVENT_NAME_PURCHASE, $properties);
+        if ($customerId = $order->getCustomerId()) {
+            $payload['user']['external_id'] = $this->hashCustomerData((string)$customerId);
+        }
+
+        return $payload;
     }
 
     /**
@@ -465,7 +479,7 @@ class TiktokManagement implements TiktokManagementInterface
             $productsContent[] = [
                 'content_id' => $item->getSku(),
                 'content_name' => $item->getName(),
-                'quantity' => $item->getQty() ?: 1,
+                'quantity' => (int)($item->getQty() ?: 1),
                 'price' => $item->getFinalPrice() ?: $item->getPrice(),
             ];
         }

@@ -78,7 +78,7 @@ class Sender
                 $this->logger->log('Missed payload: ' . json_encode($payload));
             }
         } catch (GuzzleException $e) {
-            $this->logger->log('TikTok AddToCart API request failed: ' . $e->getMessage());
+            $this->logger->log('TikTok API request failed: ' . $e->getMessage());
             $this->logger->log('Missed payload: ' . json_encode($payload));
         }
     }
