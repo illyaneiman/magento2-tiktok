@@ -133,9 +133,23 @@ interface TiktokManagementInterface
     public function setPayloadInCustomerData(array $payload, string $key): void;
 
     /**
-     * Get current store id
+     * Get hashed customer id
      *
-     * @return int|string|null
+     * @return string
      */
-    public function getStoreId(): int|string|null;
+    public function getHashedCustomerEntityId(): string;
+
+    /**
+     * Get hashed customer email
+     *
+     * @return string
+     */
+    public function getHashedCustomerEmail(): string;
+
+    /**
+     * Get hashed customer telephone
+     *
+     * @return string
+     */
+    public function getHashedCustomerTelephone(): string;
 }

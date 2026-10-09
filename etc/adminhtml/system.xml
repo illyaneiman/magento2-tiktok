@@ -27,7 +27,8 @@
                 </field>
                 <field id="pixel_id" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Pixel ID</label>
-                    <comment><![CDATA[Pixel ID is used to send frontend events. You could found it at 'Events Manager' -> 'Data Source' of your TikTok account.]]></comment>
+                    <validate>required-entry</validate>
+                    <comment><![CDATA[Pixel ID is used to send frontend events and part of payload in backend events. You could found it at 'Events Manager' -> 'Data Source' of your TikTok account.]]></comment>
                 </field>
                 <field id="tiktok_api_key" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>TikTok API Key</label>
@@ -36,6 +37,7 @@
                 </field>
                 <field id="tiktok_api_url" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>TikTok Api Url</label>
+                    <validate>required-entry</validate>
                     <comment><![CDATA[Url used by TikTok to receive API events.]]></comment>
                 </field>
                 <field id="debug" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">

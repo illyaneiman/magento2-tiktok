@@ -42,14 +42,14 @@ class PaymentMethodManagement
      *
      * @param TiktokManagementInterface $tiktokManagement
      * @param Logger $logger
-     * @param ConfigProvider $configProvider
+     * @param ConfigProvider $config
      * @param Publisher $publisher
      * @param CartRepositoryInterface $quoteRepository
      */
     public function __construct(
         private readonly TiktokManagementInterface $tiktokManagement,
         private readonly Logger $logger,
-        private readonly ConfigProvider $configProvider,
+        private readonly ConfigProvider $config,
         private readonly Publisher $publisher,
         private readonly CartRepositoryInterface $quoteRepository
     ) {
@@ -62,21 +62,22 @@ class PaymentMethodManagement
      * @param int|string $cartId
      * @param PaymentInterface $method
      * @return array
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function beforeSet(
         PaymentMethodManagementInterface|GuestPaymentMethodManagementInterface $subject,
         int|string $cartId,
         PaymentInterface $method
     ) {
-        $storeId = $this->tiktokManagement->getStoreId();
-        $isFeTrackAllowed = $this->configProvider->isFeTrackAllowed(
-            TikTokInterface::EVENT_NAME_ADD_PAYMENT_INFO,
-            $storeId
+        $isFeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_FRONTEND,
+            ConfigProvider::XML_PATH_FIELD_ADD_PAYMENT_INFO_ENABLED
         );
-        $isBeTrackAllowed = $this->configProvider->isBeTrackAllowed(
-            TikTokInterface::EVENT_NAME_ADD_PAYMENT_INFO,
-            $storeId
+        $isBeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_ADD_PAYMENT_INFO_ENABLED
         );
+
         if (!$isFeTrackAllowed && !$isBeTrackAllowed || (int)$cartId <= 0) {
             return [$cartId, $method];
         }
@@ -87,7 +88,7 @@ class PaymentMethodManagement
         try {
             $quote = $this->quoteRepository->get((int)$cartId);
         } catch (NoSuchEntityException $e) {
-            $this->logger->log('Ineiman_Tiktok could not load quote ' . $e->getMessage());
+            $this->logger->log('Ineiman_Tiktok could not load quote for Add Payment Event  ' . $e->getMessage());
             $this->logger->log($e->getTraceAsString());
             return [$cartId, $method];
         }
@@ -105,6 +106,7 @@ class PaymentMethodManagement
      * @param int|string $cartId
      * @param PaymentInterface $method
      * @return mixed
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function afterSet(
         PaymentMethodManagementInterface|GuestPaymentMethodManagementInterface $subject,
@@ -113,14 +115,13 @@ class PaymentMethodManagement
         PaymentInterface $method
     ) {
         $newMethod = $method->getMethod();
-        $storeId = $this->tiktokManagement->getStoreId();
-        $isFeTrackAllowed = $this->configProvider->isFeTrackAllowed(
-            TikTokInterface::EVENT_NAME_ADD_PAYMENT_INFO,
-            $storeId
+        $isFeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_FRONTEND,
+            ConfigProvider::XML_PATH_FIELD_ADD_PAYMENT_INFO_ENABLED
         );
-        $isBeTrackAllowed = $this->configProvider->isBeTrackAllowed(
-            TikTokInterface::EVENT_NAME_ADD_PAYMENT_INFO,
-            $storeId
+        $isBeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_ADD_PAYMENT_INFO_ENABLED
         );
 
         /**
@@ -142,7 +143,7 @@ class PaymentMethodManagement
         }
 
         if ($isBeTrackAllowed) {
-            $this->publisher->publish($payload, $storeId);
+            $this->publisher->publish($payload);
         }
 
         return $result;

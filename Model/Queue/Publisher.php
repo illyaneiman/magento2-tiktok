@@ -43,16 +43,11 @@ class Publisher
      * Send payload to the queue
      *
      * @param array $payload
-     * @param int|string|null $storeId
      * @return void
      */
-    public function publish(array $payload, int|string|null $storeId)
+    public function publish(array $payload)
     {
-        $data = [
-            'payload' => $payload,
-            'storeId' => $storeId
-        ];
-        $encodedData = json_encode($data);
+        $encodedData = json_encode($payload);
         $this->publisher->publish(self::TIKTOK_SEND_EVENT_QUEUE_TOPIC_NAME, $encodedData);
     }
 }

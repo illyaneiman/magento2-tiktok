@@ -20,6 +20,7 @@ use Ineiman\TikTok\Logger\Logger;
 use Ineiman\TikTok\Model\Config\ConfigProvider;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Sender class to send TikTok BE events to the TikTok API
@@ -44,42 +45,80 @@ class Sender
      * Send event to TikTok API
      *
      * @param array $payload
-     * @param int|string|null $storeId
      * @return void
      */
-    public function send(array $payload, int|string $storeId = null): void
+    public function send(array $payload): void
     {
-        $apiUrl = $this->configProvider->getApiUrl($storeId);
-        $apiKey = $this->configProvider->getApiKey($storeId);
-        $pixelId = $this->configProvider->getPixelId($storeId);
-        $data = [
-            'event_source' => 'web',
-            'event_source_id' => $pixelId,
-            'data' => [$payload],
-        ];
+        $response = $this->sendEvent($payload);
+        if (!$response) {
+            return;
+        }
+
+        $this->checkResponseStatus($response, $payload);
+    }
+
+    /**
+     * Check response status and log if not OK
+     *
+     * @param ResponseInterface $response
+     * @param array $payload
+     * @return void
+     */
+    private function checkResponseStatus(ResponseInterface $response, array $payload): void
+    {
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            $this->logger->log('TikTok Events API returned HTTP ' . $statusCode);
+            $this->logger->log('Missed payload: ' . json_encode($payload));
+        }
+    }
+
+    /**
+     * Send TikTok event
+     *
+     * @param array $payload
+     * @return bool|ResponseInterface
+     */
+    private function sendEvent(array $payload): bool|ResponseInterface
+    {
+        $apiUrl = $this->configProvider->getApiUrl();
+        $apiKey = $this->configProvider->getApiKey();
 
         try {
-            $response = $this->httpClient->post(
+            return $this->httpClient->post(
                 $apiUrl,
                 [
                     'headers' => [
                         'Access-Token' => $apiKey,
                         'Content-Type' => 'application/json',
                     ],
-                    'body' => json_encode($data),
+                    'body' => $this->prepareBody($payload),
                     'timeout' => 3.0,
                     'connect_timeout' => 2.0,
                 ]
             );
-
-            $statusCode = $response->getStatusCode();
-            if ($statusCode < 200 || $statusCode >= 300) {
-                $this->logger->log('TikTok Events API returned HTTP ' . $statusCode);
-                $this->logger->log('Missed payload: ' . json_encode($payload));
-            }
         } catch (GuzzleException $e) {
             $this->logger->log('TikTok API request failed: ' . $e->getMessage());
             $this->logger->log('Missed payload: ' . json_encode($payload));
+            return false;
         }
+    }
+
+    /**
+     * Prepare request body for TikTok event
+     *
+     * @param array $payload
+     * @return string
+     */
+    private function prepareBody(array $payload): string
+    {
+        $pixelId = $this->configProvider->getPixelId();
+        $data = [
+            'event_source' => 'web',
+            'event_source_id' => $pixelId,
+            'data' => [$payload],
+        ];
+
+        return json_encode($data);
     }
 }

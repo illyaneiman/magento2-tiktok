@@ -23,7 +23,7 @@ use Ineiman\TikTok\Model\Queue\Publisher;
 use Magento\CatalogSearch\Controller\Result\Index as OriginalClass;
 
 /**
- * Plugin class to trigger Search payload generation and send payload to the TikTok
+ * Preference class to trigger Search payload generation and send payload to the TikTok
  */
 class Index
 {
@@ -31,12 +31,12 @@ class Index
      * Construct
      *
      * @param TiktokManagementInterface $tiktokManagement
-     * @param ConfigProvider $configProvider
+     * @param ConfigProvider $config
      * @param Publisher $publisher
      */
     public function __construct(
         private readonly TiktokManagementInterface $tiktokManagement,
-        private readonly ConfigProvider $configProvider,
+        private readonly ConfigProvider $config,
         private readonly Publisher $publisher
     ) {
     }
@@ -46,12 +46,19 @@ class Index
      *
      * @param OriginalClass $subject
      * @return void
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function afterExecute(OriginalClass $subject)
     {
-        $storeId = $this->tiktokManagement->getStoreId();
-        $isFeTrackAllowed = $this->configProvider->isFeTrackAllowed(TikTokInterface::EVENT_NAME_SEARCH, $storeId);
-        $isBeTrackAllowed = $this->configProvider->isBeTrackAllowed(TikTokInterface::EVENT_NAME_SEARCH, $storeId);
+        $isFeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_FRONTEND,
+            ConfigProvider::XML_PATH_FIELD_SEARCH_ENABLED
+        );
+        $isBeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_SEARCH_ENABLED
+        );
+
         if (!$isBeTrackAllowed) {
             return;
         }
@@ -61,6 +68,6 @@ class Index
             $this->tiktokManagement->setPayloadInCustomerData($payload, TikTokInterface::EVENT_KEY_SEARCH);
         }
 
-        $this->publisher->publish($payload, $storeId);
+        $this->publisher->publish($payload);
     }
 }

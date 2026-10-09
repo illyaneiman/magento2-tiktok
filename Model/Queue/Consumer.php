@@ -41,14 +41,7 @@ class Consumer
      */
     public function process(string $data): void
     {
-        $data = json_decode($data, true);
-        if (!isset($data['payload'])) {
-            return;
-        }
-
-        $payload = $data['payload'];
-        $storeId = $data['storeId'];
-
-        $this->sender->send($payload, $storeId);
+        $payload = json_decode($data, true);
+        $this->sender->send($payload);
     }
 }

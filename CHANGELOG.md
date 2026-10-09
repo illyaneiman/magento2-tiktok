@@ -1,3 +1,13 @@
+2.4.7.1
+=============
+Changes:
+* Reworked approach for retrieving config data
+* Code fix for new config approach
+* Code simplification
+* Compatibility with Magento 2.4.8 version
+* Fixed issues related to cached data
+* Fixed typos in module files
+
 2.4.7.0
 =============
 * New features:

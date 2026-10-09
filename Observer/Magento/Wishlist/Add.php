@@ -37,12 +37,12 @@ class Add implements ObserverInterface
      * Construct
      *
      * @param TiktokManagementInterface $tiktokManagement
-     * @param ConfigProvider $configProvider
+     * @param ConfigProvider $config
      * @param Publisher $publisher
      */
     public function __construct(
         private readonly TiktokManagementInterface $tiktokManagement,
-        private readonly ConfigProvider $configProvider,
+        private readonly ConfigProvider $config,
         private readonly Publisher $publisher
     ) {
     }
@@ -55,15 +55,15 @@ class Add implements ObserverInterface
      */
     public function execute(EventObserver $observer)
     {
-        $storeId = $this->tiktokManagement->getStoreId();
-        $isFeTrackAllowed = $this->configProvider->isFeTrackAllowed(
-            TikTokInterface::EVENT_NAME_ADD_TO_WISHLIST,
-            $storeId
+        $isFeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_FRONTEND,
+            ConfigProvider::XML_PATH_FIELD_ADD_TO_WISHLIST_ENABLED
         );
-        $isBeTrackAllowed = $this->configProvider->isBeTrackAllowed(
-            TikTokInterface::EVENT_NAME_ADD_TO_WISHLIST,
-            $storeId
+        $isBeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_ADD_TO_WISHLIST_ENABLED
         );
+
         if (!$isFeTrackAllowed && !$isBeTrackAllowed) {
             return;
         }
@@ -79,7 +79,7 @@ class Add implements ObserverInterface
         }
 
         if ($isBeTrackAllowed) {
-            $this->publisher->publish($payload, $storeId);
+            $this->publisher->publish($payload);
         }
     }
 }

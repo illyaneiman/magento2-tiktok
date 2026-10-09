@@ -15,7 +15,6 @@
 
 namespace Ineiman\TikTok\Observer\Magento\Sales\Order\Invoice;
 
-use Ineiman\TikTok\Api\Data\TikTokInterface;
 use Ineiman\TikTok\Api\TiktokManagementInterface;
 use Ineiman\TikTok\Model\Config\ConfigProvider;
 use Ineiman\TikTok\Model\Queue\Publisher;
@@ -31,12 +30,12 @@ class Pay implements ObserverInterface
      * Construct
      *
      * @param TiktokManagementInterface $tiktokManagement
-     * @param ConfigProvider $configProvider
+     * @param ConfigProvider $config
      * @param Publisher $publisher
      */
     public function __construct(
         private readonly TiktokManagementInterface $tiktokManagement,
-        private readonly ConfigProvider $configProvider,
+        private readonly ConfigProvider $config,
         private readonly Publisher $publisher
     ) {
     }
@@ -49,14 +48,18 @@ class Pay implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $storeId = $this->tiktokManagement->getStoreId();
-        if (!$this->configProvider->isBeTrackAllowed(TikTokInterface::EVENT_NAME_PURCHASE, $storeId)) {
+        $isTrackEnabled = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_PURCHASE_ENABLED
+        );
+
+        if (!$isTrackEnabled) {
             return;
         }
 
         $invoice = $observer->getEvent()->getInvoice();
         $payload = $this->tiktokManagement->getPurchaseEventPayload($invoice);
 
-        $this->publisher->publish($payload, $storeId);
+        $this->publisher->publish($payload);
     }
 }

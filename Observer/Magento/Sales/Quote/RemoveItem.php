@@ -38,12 +38,12 @@ class RemoveItem implements ObserverInterface
      * Construct
      *
      * @param TiktokManagementInterface $tiktokManagement
-     * @param ConfigProvider $configProvider
+     * @param ConfigProvider $config
      * @param Publisher $publisher
      */
     public function __construct(
         private readonly TiktokManagementInterface $tiktokManagement,
-        private readonly ConfigProvider $configProvider,
+        private readonly ConfigProvider $config,
         private readonly Publisher $publisher
     ) {
     }
@@ -56,15 +56,15 @@ class RemoveItem implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $storeId = $this->tiktokManagement->getStoreId();
-        $isFeTrackAllowed = $this->configProvider->isFeTrackAllowed(
-            TikTokInterface::EVENT_NAME_REMOVE_FROM_CART,
-            $storeId
+        $isFeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_FRONTEND,
+            ConfigProvider::XML_PATH_FIELD_REMOVE_FROM_CART_ENABLED
         );
-        $isBeTrackAllowed = $this->configProvider->isBeTrackAllowed(
-            TikTokInterface::EVENT_NAME_REMOVE_FROM_CART,
-            $storeId
+        $isBeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_REMOVE_FROM_CART_ENABLED
         );
+
         if (!$isFeTrackAllowed && !$isBeTrackAllowed) {
             return;
         }
@@ -80,7 +80,7 @@ class RemoveItem implements ObserverInterface
         }
 
         if ($isBeTrackAllowed) {
-            $this->publisher->publish($payload, $storeId);
+            $this->publisher->publish($payload);
         }
     }
 }

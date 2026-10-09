@@ -1,7 +1,7 @@
 # Ineiman_TikTok Module for Magento2
 
-[![Ineiman TikTok](https://img.shields.io/badge/version-2.4.7.0-green.svg)](https://github.com/illyaneiman/magento2-tiktok.git)
-[![Package](https://img.shields.io/badge/package-2.4.7.0-blue.svg)](https://github.com/illyaneiman/magento2-tiktok.git)
+[![Ineiman TikTok](https://img.shields.io/badge/version-2.4.7.1-green.svg)](https://github.com/illyaneiman/magento2-tiktok.git)
+[![Package](https://img.shields.io/badge/package-2.4.7.1-blue.svg)](https://github.com/illyaneiman/magento2-tiktok.git)
 
 This module allows you to track TikTok events.
 
@@ -15,10 +15,10 @@ You could track both: FE and BE events.
   * UpdateCart
   * RemoveFromCart
   * AddToWishlist
-  * AddPaymentInfo
-  * InitiateCheckout
-  * PlaceAnOrder
   * ViewContent
+  * InitiateCheckout
+  * AddPaymentInfo
+  * PlaceAnOrder
   * Search
   * CompleteRegistration
 * TikTok API (backend) events tracking:
@@ -26,10 +26,12 @@ You could track both: FE and BE events.
   * UpdateCart
   * RemoveFromCart
   * AddToWishlist
-  * AddPaymentInfo
-  * InitiateCheckout
-  * PlaceAnOrder
+  * RemoveFromWishlist
   * ViewContent
+  * InitiateCheckout
+  * AddPaymentInfo
+  * PlaceAnOrder
+  * Purchase
   * Search
   * CompleteRegistration
 

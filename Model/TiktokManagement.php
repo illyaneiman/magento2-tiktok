@@ -18,62 +18,36 @@ namespace Ineiman\TikTok\Model;
 
 use Ineiman\TikTok\Api\Data\TikTokInterface;
 use Ineiman\TikTok\Api\TiktokManagementInterface;
-use Ineiman\TikTok\Logger\Logger;
-use Magento\Catalog\Helper\Data as CatalogData;
+use Ineiman\TikTok\Model\Management\CustomerData;
+use Ineiman\TikTok\Model\Management\Data;
+use Ineiman\TikTok\Model\Management\ProductData;
 use Magento\Catalog\Model\Product;
-use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Customer\Model\Data\Customer;
-use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Request\DataPersistorInterface;
-use Magento\Framework\App\RequestInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Math\Random;
-use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Item;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Search\Model\QueryFactory;
-use Magento\Store\Api\Data\StoreInterface;
-use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * TikTok management class to retrieve and manage data
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- * @SuppressWarnings(PHPMD.CookieAndSessionMisuse)
  */
 class TiktokManagement implements TiktokManagementInterface
 {
     /**
-     * @var StoreInterface|null
-     */
-    private ?StoreInterface $store = null;
-
-    /**
      * Construct
      *
-     * @param Logger $logger
-     * @param CatalogData $catalogData
-     * @param CheckoutSession $checkoutSession
-     * @param CustomerSession $customerSession
+     * @param CustomerData $customerData
+     * @param Data $data
+     * @param ProductData $productData
      * @param DataPersistorInterface $dataPersistor
-     * @param RequestInterface $request
-     * @param Random $random
-     * @param QueryFactory $queryFactory
-     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
-        private readonly Logger $logger,
-        private readonly CatalogData $catalogData,
-        private readonly CheckoutSession $checkoutSession,
-        private readonly CustomerSession $customerSession,
-        private readonly DataPersistorInterface $dataPersistor,
-        private readonly RequestInterface $request,
-        private readonly Random $random,
-        private readonly QueryFactory $queryFactory,
-        private readonly StoreManagerInterface $storeManager
+        private readonly CustomerData $customerData,
+        private readonly Data $data,
+        private readonly ProductData $productData,
+        private readonly DataPersistorInterface $dataPersistor
     ) {
     }
 
@@ -82,12 +56,9 @@ class TiktokManagement implements TiktokManagementInterface
      */
     public function getAddToCartEventPayload(Product $product): array
     {
-        $qty = $this->request->getParam('qty', 1);
-        if ($qty <= 0) {
-            $qty = 1;
-        }
-
+        $productsContent = [];
         $price = (float)$product->getFinalPrice();
+        $qty = $this->productData->getRequestedProductQty();
         $totalPrice = round($price * $qty, 2);
         $contentType = $product->getTypeId() === Configurable::TYPE_CODE
             ? TikTokInterface::CONTENT_TYPE_PRODUCT_GROUP
@@ -183,18 +154,19 @@ class TiktokManagement implements TiktokManagementInterface
         /**
          * If both FE and BE events enabled than for FE event payload already saved in dataPersistor
          */
-        if ($payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_VIEW_CONTENT)) {
+        $payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_VIEW_CONTENT);
+        if ($payload) {
             $this->dataPersistor->clear(TikTokInterface::EVENT_KEY_VIEW_CONTENT);
             return $payload[0];
         }
 
-        $product = $this->catalogData->getProduct();
-        $productsContent = $this->prepareProductsContent([$product]);
+        $product = $this->productData->getProduct();
+        $productsContent = $product ? $this->prepareProductsContent([$product]) : [];
         $properties = $this->preparePropertiesData(
             $productsContent,
             TikTokInterface::CONTENT_TYPE_PRODUCT,
-            $product->getName(),
-            $product->getFinalPrice()
+            $product?->getName(),
+            $product?->getFinalPrice()
         );
 
         return $this->getEventPayload(TikTokInterface::EVENT_NAME_VIEW_CONTENT, $properties);
@@ -208,12 +180,13 @@ class TiktokManagement implements TiktokManagementInterface
         /**
          * If both FE and BE events enabled than for FE event payload already saved in dataPersistor
          */
-        if ($payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_INITIATE_CHECKOUT)) {
+        $payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_INITIATE_CHECKOUT);
+        if ($payload) {
             $this->dataPersistor->clear(TikTokInterface::EVENT_KEY_INITIATE_CHECKOUT);
             return $payload[0];
         }
 
-        $quote = $this->loadQuote();
+        $quote = $this->data->loadQuote();
         if (!$quote) {
             return [];
         }
@@ -251,7 +224,8 @@ class TiktokManagement implements TiktokManagementInterface
         /**
          * If both FE and BE events enabled than for FE event payload already saved in dataPersistor
          */
-        if ($payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_PLACE_AN_ORDER)) {
+        $payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_PLACE_AN_ORDER);
+        if ($payload) {
             $this->dataPersistor->clear(TikTokInterface::EVENT_KEY_PLACE_AN_ORDER);
             return $payload[0];
         }
@@ -260,7 +234,7 @@ class TiktokManagement implements TiktokManagementInterface
          * If only FE event enabled there are no order passed so retrieve it from the checkout session
          */
         if (!$order) {
-            $order = $this->checkoutSession->getLastRealOrder();
+            $order = $this->data->getLastRealOrder();
         }
         $items = $order->getAllVisibleItems();
 
@@ -292,12 +266,13 @@ class TiktokManagement implements TiktokManagementInterface
 
         $payload = $this->getEventPayload(TikTokInterface::EVENT_NAME_PURCHASE, $properties);
         $payload['user'] = [
-            'email' => $this->hashCustomerData($order->getCustomerEmail()),
-            'phone' => $this->hashCustomerData($invoice->getShippingAddress()->getTelephone())
+            'email' => $this->customerData->hashCustomerData($order->getCustomerEmail()),
+            'phone' => $this->customerData->hashCustomerData($invoice->getShippingAddress()->getTelephone())
         ];
 
-        if ($customerId = $order->getCustomerId()) {
-            $payload['user']['external_id'] = $this->hashCustomerData((string)$customerId);
+        $customerId = $order->getCustomerId();
+        if ($customerId) {
+            $payload['user']['external_id'] = $this->customerData->hashCustomerData((string)$customerId);
         }
 
         return $payload;
@@ -311,14 +286,14 @@ class TiktokManagement implements TiktokManagementInterface
         /**
          * If both FE and BE events enabled than for FE event payload already saved in dataPersistor
          */
-        if ($payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_SEARCH)) {
+        $payload = $this->dataPersistor->get(TikTokInterface::EVENT_KEY_SEARCH);
+        if ($payload) {
             $this->dataPersistor->clear(TikTokInterface::EVENT_KEY_SEARCH);
             return $payload[0];
         }
 
-        $query = $this->queryFactory->get();
         $properties = [
-            'search_string' => $query->getQueryText()
+            'search_string' => $this->data->getSearchText()
         ];
 
         return $this->getEventPayload(TikTokInterface::EVENT_NAME_SEARCH, $properties);
@@ -353,9 +328,25 @@ class TiktokManagement implements TiktokManagementInterface
     /**
      * @inheritDoc
      */
-    public function getStoreId(): int|string|null
+    public function getHashedCustomerEntityId(): string
     {
-        return $this->getStore()?->getId();
+        return $this->customerData->getHashedCustomerEntityId();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHashedCustomerEmail(): string
+    {
+        return $this->customerData->getHashedCustomerEmail();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHashedCustomerTelephone(): string
+    {
+        return $this->customerData->getHashedCustomerTelephone();
     }
 
     /**
@@ -363,50 +354,19 @@ class TiktokManagement implements TiktokManagementInterface
      *
      * @param array $contents
      * @param string $type
-     * @param string $description
-     * @param float $total
+     * @param string|null $description
+     * @param float|null $total
      * @return array
      */
-    private function preparePropertiesData(array $contents, string $type, string $description, float $total): array
+    private function preparePropertiesData(array $contents, string $type, ?string $description, ?float $total): array
     {
         return [
             'contents' => $contents,
             'content_type' => $type,
             'description' => $description,
             'value' => $total,
-            'currency' => $this->getCurrencyCode(),
+            'currency' => $this->data->getCurrencyCode(),
         ];
-    }
-
-    /**
-     * Get store currency code
-     *
-     * @return string
-     */
-    private function getCurrencyCode(): string
-    {
-        $store = $this->getStore();
-        return $store ? $store->getBaseCurrency()->getCode() : TikTokInterface::DEFAULT_CURRENCY_CODE;
-    }
-
-    /**
-     * Get store data
-     *
-     * @return StoreInterface|null
-     */
-    private function getStore(): ?StoreInterface
-    {
-        if (!$this->store) {
-            try {
-                return $this->storeManager->getStore();
-            } catch (NoSuchEntityException $e) {
-                $this->logger->log('Ineiman_Tiktok could not get store: ' . $e->getMessage());
-                $this->logger->log($e->getTraceAsString());
-                return null;
-            }
-        }
-
-        return $this->store;
     }
 
     /**
@@ -426,14 +386,15 @@ class TiktokManagement implements TiktokManagementInterface
             'properties' => $properties
         ];
 
-        $customer = $this->customerSession->getCustomer();
-        if ($customer && $customer->getId()) {
+        $customer = $this->customerData->getCustomer();
+        if ($customer->getId()) {
             $defaultShipping = $customer->getDefaultShippingAddress();
+            $phone = $defaultShipping ? $defaultShipping->getTelephone() : '';
 
             $payload['user'] = [
-                'email' => $this->hashCustomerData($customer->getEmail()),
-                'phone' => $this->hashCustomerData($defaultShipping->getTelephone()),
-                'external_id' => $this->hashCustomerData($customer->getId())
+                'email' => $this->customerData->hashCustomerData($customer->getEmail()),
+                'phone' => $this->customerData->hashCustomerData($phone),
+                'external_id' => $this->customerData->hashCustomerData($customer->getId())
             ];
         }
 
@@ -443,27 +404,12 @@ class TiktokManagement implements TiktokManagementInterface
     /**
      * Get unique event id.
      *
-     * @param int|string|null $eventTime
+     * @param int $eventTime
      * @return string
      */
-    private function getEventId(int|string $eventTime = null): string
+    private function getEventId(int $eventTime): string
     {
-        return 'eventId_' . $eventTime . '_' . $this->getEventIdSalt();
-    }
-
-    /**
-     * Get salt for eventId
-     *
-     * @return string
-     */
-    private function getEventIdSalt(): string
-    {
-        try {
-            return $this->random->getRandomString(24);
-        } catch (LocalizedException $e) {
-            $this->logger->log('Error with randomizing string for eventId: ' . $e->getMessage());
-            return '';
-        }
+        return 'eventId_' . $eventTime . '_' . $this->data->getEventIdSalt();
     }
 
     /**
@@ -485,32 +431,5 @@ class TiktokManagement implements TiktokManagementInterface
         }
 
         return $productsContent;
-    }
-
-    /**
-     * Load quote from checkout session
-     *
-     * @return CartInterface|Quote|null
-     */
-    private function loadQuote(): CartInterface|Quote|null
-    {
-        try {
-            return $this->checkoutSession->getQuote();
-        } catch (NoSuchEntityException|LocalizedException $e) {
-            $this->logger->log('Ineiman_Tiktok could not load quote from session: ' . $e->getMessage());
-            $this->logger->log($e->getTraceAsString());
-            return null;
-        }
-    }
-
-    /**
-     * Hash customer field value
-     *
-     * @param string $field
-     * @return string
-     */
-    private function hashCustomerData(string $field): string
-    {
-        return hash('sha256', strtolower(trim($field)));
     }
 }

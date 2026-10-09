@@ -2,7 +2,7 @@
     "name": "ineiman/magento2-tiktok",
     "description": "Magento2 Tiktok Module",
     "type": "magento2-module",
-    "version": "2.4.7.0",
+    "version": "2.4.7.1",
     "authors": [
         {
             "name": "Illia Neiman",

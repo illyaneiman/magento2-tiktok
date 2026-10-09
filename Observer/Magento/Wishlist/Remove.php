@@ -15,7 +15,6 @@
 
 namespace Ineiman\TikTok\Observer\Magento\Wishlist;
 
-use Ineiman\TikTok\Api\Data\TikTokInterface;
 use Ineiman\TikTok\Api\TiktokManagementInterface;
 use Ineiman\TikTok\Model\Config\ConfigProvider;
 use Ineiman\TikTok\Model\Queue\Publisher;
@@ -31,12 +30,12 @@ class Remove implements ObserverInterface
      * Construct
      *
      * @param TiktokManagementInterface $tiktokManagement
-     * @param ConfigProvider $configProvider
+     * @param ConfigProvider $config
      * @param Publisher $publisher
      */
     public function __construct(
         private readonly TiktokManagementInterface $tiktokManagement,
-        private readonly ConfigProvider $configProvider,
+        private readonly ConfigProvider $config,
         private readonly Publisher $publisher
     ) {
     }
@@ -49,10 +48,9 @@ class Remove implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $storeId = $this->tiktokManagement->getStoreId();
-        $isBeTrackAllowed = $this->configProvider->isBeTrackAllowed(
-            TikTokInterface::EVENT_NAME_REMOVE_FROM_WISHLIST,
-            $storeId
+        $isBeTrackAllowed = $this->config->isEventTrackAllowed(
+            ConfigProvider::XML_PATH_GROUP_BACKEND,
+            ConfigProvider::XML_PATH_FIELD_REMOVE_FROM_WISHLIST_ENABLED
         );
         if (!$isBeTrackAllowed) {
             return;
@@ -69,6 +67,6 @@ class Remove implements ObserverInterface
         }
 
         $payload = $this->tiktokManagement->getRemoveFromWishlistEventPayload($product);
-        $this->publisher->publish($payload, $storeId);
+        $this->publisher->publish($payload);
     }
 }
